@@ -1,0 +1,21 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    .instruction-input {
+        height: auto;
+        width: 100%;
+        min-height: 350px;
+        resize: none;
+        // border: none;
+        outline: none;
+    }
+    .code-block {
+        // border-left: 3px solid #0c7198;
+    }
+    .control-block {
+        display: flex;
+        justify-content: space-between;
+    }
+}
