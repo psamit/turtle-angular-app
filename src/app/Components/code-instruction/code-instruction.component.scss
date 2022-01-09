@@ -13,6 +13,9 @@
     }
     .code-block {
         // border-left: 3px solid #0c7198;
+        .title {
+            font-weight: bold;
+        }
     }
     .control-block {
         display: flex;
