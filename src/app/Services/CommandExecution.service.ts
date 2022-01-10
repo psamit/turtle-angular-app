@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, map, tap } from 'rxjs';
 import { Command } from '../Interfaces/Command';
 import { CanvasDrawService } from './CanvasDraw.service';
 
@@ -10,12 +10,18 @@ const RE_EXTRACT_COMMAND_AND_PARAMS = /.+?\b/gm;
 })
 export class CommandExecutionService {
   constructor(private canvasDrawService: CanvasDrawService) {
-    this.executeCommands().subscribe((commands) => {
-      this._executeAll(commands);
-    });
+    this.extractCommands$.pipe(
+      map((instructionLine) => {
+        return this._extractSingleLineCommand(instructionLine)
+      }),
+      tap(command => {
+        this._execute(command);
+      })
+    )
+    .subscribe();
   }
 
-  extractCommands$ = new BehaviorSubject<string[]>([]);
+  extractCommands$ = new BehaviorSubject<string>('');
 
   resetCanvas() {
     this.canvasDrawService.reset();
@@ -77,10 +83,6 @@ export class CommandExecutionService {
     }
   }
 
-  private _executeAll(commands: Command[]) {
-    commands.forEach((command) => this._execute(command));
-  }
-
   private _extractSingleLineCommand(instruction: string) {
     const extractedInstruction =
       instruction.match(RE_EXTRACT_COMMAND_AND_PARAMS) || ([] as string[]);
@@ -94,15 +96,5 @@ export class CommandExecutionService {
       command: commandString,
       parameter: parameterString,
     } as Command;
-  }
-
-  executeCommands() {
-    return this.extractCommands$.pipe(
-      map((instructions: string[]) => {
-        return instructions.map((instructionLine) => {
-          return this._extractSingleLineCommand(instructionLine);
-        });
-      }),
-    );
   }
 }

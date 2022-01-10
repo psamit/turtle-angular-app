@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject, filter } from 'rxjs';
+import { BehaviorSubject, concatMap, debounceTime, delay, filter, from, of, switchMap, tap, timer } from 'rxjs';
 import { CommandExecutionService } from '../../Services/CommandExecution.service';
 
 @Component({
@@ -9,23 +9,33 @@ import { CommandExecutionService } from '../../Services/CommandExecution.service
 })
 export class CodeInstructionComponent implements OnInit {
   constructor(private commandExecutionService: CommandExecutionService) {
-    this.drawCanvas$.pipe(filter((isDraw) => isDraw)).subscribe(() => {
-      const instructions = this.instructions
-        .trim()
-        .split('\n')
-        .map((i) => i.trim())
-        .filter((i) => !!i);
-      this.commandExecutionService.extractCommands$.next(instructions);
+    this.drawCanvas$
+    .pipe(
+      debounceTime(1000),
+      filter((isDraw) => isDraw),
+      switchMap(() => {
+        return this.extractInstructions();
+      }),
+      concatMap(val => {
+        return of(val).pipe(delay(1000))
+      }),
+      tap(instruction => {
+        this.commandExecutionService.extractCommands$.next(instruction);
+      })
+    ).subscribe(() => {
       this.drawCanvas$.next(false);
     });
   }
+
+  executedInstructions: string[] = [];
 
   instructions: string = '';
   drawCanvas$ = new BehaviorSubject<boolean>(false);
 
   ngOnInit(): void {}
 
-  onInstructionUpdate(event: Event) {}
+  onInstructionUpdate(event: Event) {
+  }
 
   draw() {
     this.reset();
@@ -33,10 +43,20 @@ export class CodeInstructionComponent implements OnInit {
   }
 
   reset() {
+    this.executedInstructions = [];
     this.commandExecutionService.resetCanvas();
   }
 
+  extractInstructions() {
+    const instructions = this.instructions
+          .trim()
+          .split('\n')
+          .map((i) => i.trim())
+          .filter((i) => !!i);
+
+    return from(instructions)
+  }
+
   animate() {
-    // this.commandExecutionService.animate$.next(true);
   }
 }
