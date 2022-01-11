@@ -25,7 +25,7 @@ export class CodeInstructionComponent implements OnInit, AfterViewInit {
         debounceTime(1000),
         switchMap(() => {
           this.commandExecutionService.resetCanvas();
-          return this.extractInstructions();
+          return from(this.extractInstructions())
         }),
         concatMap(val => {
           return of(val).pipe(delay(500))
@@ -45,12 +45,9 @@ export class CodeInstructionComponent implements OnInit, AfterViewInit {
   }
 
   private extractInstructions() {
-    const instructions = this.instructions
-          .trim()
-          .split('\n')
-          .map((i) => i.trim())
-          .filter((i) => !!i);
-
-    return from(instructions)
+    return this.instructions
+      .split('\n')
+      .map((i) => i.trim())
+      .filter((i) => !!i);
   }
 }
