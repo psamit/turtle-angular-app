@@ -17,7 +17,7 @@ export class CodeInstructionComponent implements OnInit {
         return this.extractInstructions();
       }),
       concatMap(val => {
-        return of(val).pipe(delay(1000))
+        return of(val).pipe(delay(500))
       }),
       tap(instruction => {
         this.commandExecutionService.extractCommands$.next(instruction);

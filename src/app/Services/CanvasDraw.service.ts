@@ -276,6 +276,7 @@ export class CanvasDrawService {
   backward(distance: number) {
     this.left(180);
     this.forward(distance);
+    this.left(180);
   }
 
   center() {
