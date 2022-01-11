@@ -75,7 +75,6 @@ export class CommandExecutionService {
         // @ts-ignore
         this.canvasDrawService.width(...parameter);
         break;
-
       case 'pencolor':
         // @ts-ignore
         this.canvasDrawService.color(...parameter);

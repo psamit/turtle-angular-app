@@ -3,15 +3,12 @@
     <div class="title">Command Editor</div>
     <textarea
       class="instruction-input"
-      id="editing"
       spellcheck="false"
       [(ngModel)]="instructions"
-      (ngModelChange)="onInstructionUpdate($event)"
     ></textarea>
   </div>
   <div class="control-block">
-    <input type="button" (click)="draw()" value="Draw Canvas" />
-    <!-- <input type="button" (click)="animate()" value="Animate" /> -->
-    <input type="button" (click)="reset()" value="Reset Canvas" />
+    <input #drawCanvasBtn type="button" value="Draw Canvas" />
+    <input #resetCanvasBtn type="button" value="Reset Canvas" />
   </div>
 </div>

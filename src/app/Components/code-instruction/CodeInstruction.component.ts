@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject, concatMap, debounceTime, delay, filter, from, of, switchMap, tap, timer } from 'rxjs';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { concatMap, debounceTime, delay, from, fromEvent, of, Subject, switchMap, tap } from 'rxjs';
 import { CommandExecutionService } from '../../Services/CommandExecution.service';
 
 @Component({
@@ -7,47 +7,44 @@ import { CommandExecutionService } from '../../Services/CommandExecution.service
   templateUrl: './code-instruction.component.html',
   styleUrls: ['./code-instruction.component.scss'],
 })
-export class CodeInstructionComponent implements OnInit {
-  constructor(private commandExecutionService: CommandExecutionService) {
-    this.drawCanvas$
-    .pipe(
-      debounceTime(1000),
-      filter((isDraw) => isDraw),
-      switchMap(() => {
-        return this.extractInstructions();
-      }),
-      concatMap(val => {
-        return of(val).pipe(delay(500))
-      }),
-      tap(instruction => {
-        this.commandExecutionService.extractCommands$.next(instruction);
-      })
-    ).subscribe(() => {
-      this.drawCanvas$.next(false);
-    });
-  }
-
-  executedInstructions: string[] = [];
+export class CodeInstructionComponent implements OnInit, AfterViewInit {
+  constructor(private commandExecutionService: CommandExecutionService) {}
 
   instructions: string = '';
-  drawCanvas$ = new BehaviorSubject<boolean>(false);
+  drawCanvas$ = new Subject();
+
+  @ViewChild('drawCanvasBtn', { static: true }) drawCanvasBtn: ElementRef | null = null;
+  @ViewChild('resetCanvasBtn', { static: true }) resetCanvasBtn: ElementRef | null = null;;
+
 
   ngOnInit(): void {}
 
-  onInstructionUpdate(event: Event) {
+  ngAfterViewInit(): void {
+    fromEvent(this.drawCanvasBtn?.nativeElement, 'click')
+      .pipe(
+        debounceTime(1000),
+        switchMap(() => {
+          this.commandExecutionService.resetCanvas();
+          return this.extractInstructions();
+        }),
+        concatMap(val => {
+          return of(val).pipe(delay(500))
+        }),
+        tap(instruction => {
+          this.commandExecutionService.extractCommands$.next(instruction);
+        })
+      ).subscribe();
+
+    fromEvent(this.resetCanvasBtn?.nativeElement, 'click')
+      .pipe(
+        debounceTime(1000),
+        tap(() => {
+          this.commandExecutionService.resetCanvas();
+        })
+      ).subscribe();
   }
 
-  draw() {
-    this.reset();
-    this.drawCanvas$.next(true);
-  }
-
-  reset() {
-    this.executedInstructions = [];
-    this.commandExecutionService.resetCanvas();
-  }
-
-  extractInstructions() {
+  private extractInstructions() {
     const instructions = this.instructions
           .trim()
           .split('\n')
@@ -55,8 +52,5 @@ export class CodeInstructionComponent implements OnInit {
           .filter((i) => !!i);
 
     return from(instructions)
-  }
-
-  animate() {
   }
 }

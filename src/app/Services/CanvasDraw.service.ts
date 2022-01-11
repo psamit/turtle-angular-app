@@ -38,7 +38,7 @@ export class CanvasDrawService {
       b: 0,
       a: 1,
     },
-    gridStep: 20,
+    gridStep: 10,
   };
 
   turtleState: TurtleState = { ...this.turtleInitialState };
@@ -163,7 +163,7 @@ export class CanvasDrawService {
 
     this.goto(0, 0);
 
-    this.width(2);
+    this.width(0.5);
     for (let i = 0; i < 4; i++) {
       this.goto(0, 0);
       this.forward(375);
@@ -202,6 +202,7 @@ export class CanvasDrawService {
 
     this.goto(0, 0);
     this.angle(0);
+    this.width(1);
   }
 
   forward(distance: number) {
